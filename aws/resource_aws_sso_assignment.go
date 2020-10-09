@@ -17,28 +17,12 @@ func resourceAwsSsoAssignment() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAwsSsoAssignmentCreate,
 		Read:   resourceAwsSsoAssignmentRead,
-		Update: resourceAwsSsoAssignmentUpdate,
 		Delete: resourceAwsSsoAssignmentDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
 			"created_date": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"failure_reason": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"request_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -101,8 +85,6 @@ func resourceAwsSsoAssignment() *schema.Resource {
 func resourceAwsSsoAssignmentCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*AWSClient).ssoadminconn
 
-	log.Printf("[INFO] Creating AWS SSO Assignment")
-
 	instanceArn := d.Get("instance_arn").(string)
 	permissionSetArn := d.Get("permission_set_arn").(string)
 	principalID := d.Get("principal_id").(string)
@@ -128,6 +110,7 @@ func resourceAwsSsoAssignmentCreate(d *schema.ResourceData, meta interface{}) er
 		TargetType:       aws.String(targetType),
 	}
 
+	log.Printf("[INFO] Creating AWS SSO Assignment")
 	resp, err := conn.CreateAccountAssignment(req)
 	if err != nil {
 		return fmt.Errorf("Error creating AWS SSO Assignment: %s", err)
@@ -138,19 +121,10 @@ func resourceAwsSsoAssignmentCreate(d *schema.ResourceData, meta interface{}) er
 	if status.CreatedDate != nil {
 		d.Set("created_date", status.CreatedDate.Format(time.RFC3339))
 	}
-	if status.FailureReason != nil {
-		d.Set("failure_reason", status.FailureReason)
-	}
-	if status.RequestId != nil {
-		d.Set("request_id", status.RequestId)
-	}
-	if status.Status != nil {
-		d.Set("status", status.Status)
-	}
 
-	waitResp, waitErr := waitForAssignmentCreation(d, conn, instanceArn, aws.StringValue(status.RequestId))
+	waitResp, waitErr := waitForAssignmentCreation(conn, instanceArn, aws.StringValue(status.RequestId))
 	if waitErr != nil {
-		return fmt.Errorf("Error waiting for AWS SSO Assignment: %s", waitErr)
+		return fmt.Errorf("Error waiting for AWS SSO Assignment creation: %s", waitErr)
 	}
 
 	// IN_PROGRESS | FAILED | SUCCEEDED
@@ -158,28 +132,112 @@ func resourceAwsSsoAssignmentCreate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Failed to create AWS SSO Assignment: %s", aws.StringValue(waitResp.FailureReason))
 	}
 
+	if waitResp.CreatedDate != nil {
+		d.Set("created_date", waitResp.CreatedDate.Format(time.RFC3339))
+	}
+
 	return resourceAwsSsoAssignmentRead(d, meta)
 }
 
 func resourceAwsSsoAssignmentRead(d *schema.ResourceData, meta interface{}) error {
-	// conn := meta.(*AWSClient).ssoadminconn
-	// TODO
-	return nil
-}
+	conn := meta.(*AWSClient).ssoadminconn
 
-func resourceAwsSsoAssignmentUpdate(d *schema.ResourceData, meta interface{}) error {
-	// conn := meta.(*AWSClient).ssoadminconn
-	// TODO
-	return resourceAwsSsoAssignmentRead(d, meta)
+	instanceArn := d.Get("instance_arn").(string)
+	permissionSetArn := d.Get("permission_set_arn").(string)
+	principalID := d.Get("principal_id").(string)
+	principalType := d.Get("principal_type").(string)
+	targetID := d.Get("target_id").(string)
+	targetType := d.Get("target_type").(string)
+
+	vars := []string{
+		permissionSetArn,
+		targetType,
+		targetID,
+		principalType,
+		principalID,
+	}
+
+	req := &ssoadmin.ListAccountAssignmentsInput{
+		InstanceArn:      aws.String(instanceArn),
+		PermissionSetArn: aws.String(permissionSetArn),
+		AccountId:        aws.String(targetID),
+	}
+
+	log.Printf("[DEBUG] Reading AWS SSO Assignments for %s", req)
+	resp, err := conn.ListAccountAssignments(req)
+	if err != nil {
+		return fmt.Errorf("Error getting AWS SSO Assignments: %s", err)
+	}
+
+	if resp == nil || len(resp.AccountAssignments) == 0 {
+		// TODO: is this correct?
+		log.Printf("[DEBUG] No account assignments found")
+		d.SetId("")
+		return nil
+	}
+
+	for _, accountAssignment := range resp.AccountAssignments {
+		if aws.StringValue(accountAssignment.PrincipalType) == principalType {
+			if aws.StringValue(accountAssignment.PrincipalId) == principalID {
+				// TODO: is this correct?
+				d.SetId(strings.Join(vars, "_"))
+				return nil
+			}
+		}
+	}
+
+	// TODO: is this correct?
+	log.Printf("[DEBUG] Account assignment not found for %s", map[string]string{
+		"PrincipalType": principalType,
+		"PrincipalId":   principalID,
+	})
+	d.SetId("")
+	return nil
 }
 
 func resourceAwsSsoAssignmentDelete(d *schema.ResourceData, meta interface{}) error {
-	// conn := meta.(*AWSClient).ssoadminconn
-	// TODO
+	conn := meta.(*AWSClient).ssoadminconn
+
+	instanceArn := d.Get("instance_arn").(string)
+	permissionSetArn := d.Get("permission_set_arn").(string)
+	principalID := d.Get("principal_id").(string)
+	principalType := d.Get("principal_type").(string)
+	targetID := d.Get("target_id").(string)
+	targetType := d.Get("target_type").(string)
+
+	req := &ssoadmin.DeleteAccountAssignmentInput{
+		InstanceArn:      aws.String(instanceArn),
+		PermissionSetArn: aws.String(permissionSetArn),
+		PrincipalId:      aws.String(principalID),
+		PrincipalType:    aws.String(principalType),
+		TargetId:         aws.String(targetID),
+		TargetType:       aws.String(targetType),
+	}
+
+	log.Printf("[INFO] Deleting AWS SSO Assignment")
+	resp, err := conn.DeleteAccountAssignment(req)
+	if err != nil {
+		return fmt.Errorf("Error deleting AWS SSO Assignment: %s", err)
+	}
+
+	status := resp.AccountAssignmentDeletionStatus
+
+	waitResp, waitErr := waitForAssignmentDeletion(conn, instanceArn, aws.StringValue(status.RequestId))
+	if waitErr != nil {
+		return fmt.Errorf("Error waiting for AWS SSO Assignment deletion: %s", waitErr)
+	}
+
+	// IN_PROGRESS | FAILED | SUCCEEDED
+	if aws.StringValue(waitResp.Status) == "FAILED" {
+		return fmt.Errorf("Failed to delete AWS SSO Assignment: %s", aws.StringValue(waitResp.FailureReason))
+	}
+
+	// TODO: is this correct?
+	d.SetId("")
 	return nil
 }
 
-func waitForAssignmentCreation(d *schema.ResourceData, conn *ssoadmin.SSOAdmin, instanceArn string, requestID string) (*ssoadmin.AccountAssignmentOperationStatus, error) {
+func waitForAssignmentCreation(conn *ssoadmin.SSOAdmin, instanceArn string, requestID string) (*ssoadmin.AccountAssignmentOperationStatus, error) {
 	var status *ssoadmin.AccountAssignmentOperationStatus
 
 	// TODO: timeout
@@ -195,28 +253,40 @@ func waitForAssignmentCreation(d *schema.ResourceData, conn *ssoadmin.SSOAdmin, 
 
 		status = resp.AccountAssignmentCreationStatus
 
-		if status.CreatedDate != nil {
-			d.Set("created_date", status.CreatedDate.Format(time.RFC3339))
-		}
-		if status.FailureReason != nil {
-			d.Set("failure_reason", status.FailureReason)
-		}
-		if status.RequestId != nil {
-			d.Set("request_id", status.RequestId)
-		}
-		if status.Status != nil {
-			d.Set("status", status.Status)
-		}
-
 		if aws.StringValue(status.Status) != "IN_PROGRESS" {
 			break
 		}
 
+		// TODO: configure wait time
 		time.Sleep(time.Second)
 	}
 
 	return status, nil
 }
 
-// func waitForAssignmentDeletion(conn *ssoadmin.SSOAdmin, instanceArn string, requestId string) error {
-// }
+func waitForAssignmentDeletion(conn *ssoadmin.SSOAdmin, instanceArn string, requestID string) (*ssoadmin.AccountAssignmentOperationStatus, error) {
+	var status *ssoadmin.AccountAssignmentOperationStatus
+
+	// TODO: timeout
+	for {
+		resp, err := conn.DescribeAccountAssignmentDeletionStatus(&ssoadmin.DescribeAccountAssignmentDeletionStatusInput{
+			InstanceArn:                        aws.String(instanceArn),
+			AccountAssignmentDeletionRequestId: aws.String(requestID),
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		status = resp.AccountAssignmentDeletionStatus
+
+		if aws.StringValue(status.Status) != "IN_PROGRESS" {
+			break
+		}
+
+		// TODO: configure wait time
+		time.Sleep(time.Second)
+	}
+
+	return status, nil
+}
