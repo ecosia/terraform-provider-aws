@@ -70,11 +70,6 @@ behavior "deprecated_import_commenter" "sdkv1_deprecated" {
   EOF
 }
 
-behavior "opened_pull_request_labeler" "triage" {
-  labels             = ["needs-triage"]
-  skip_collaborators = true
-}
-
 queued_behavior "release_commenter" "releases" {
   repo_prefix = "terraform-provider-"
 
@@ -397,6 +392,9 @@ behavior "regexp_issue_labeler_v2" "service_labels" {
     "service/macie" = [
       "aws_macie_",
     ],
+    "service/macie2" = [
+      "aws_macie2_",
+    ],
     "service/marketplacecatalog" = [
       "aws_marketplace_catalog_",
     ],
@@ -549,6 +547,9 @@ behavior "regexp_issue_labeler_v2" "service_labels" {
     ],
     "service/synthetics" = [
       "aws_synthetics_",
+    ],
+    "service/timestreamwrite" = [
+      "aws_timestreamwrite_",
     ],
     "service/transfer" = [
       "aws_transfer_",
@@ -1166,6 +1167,11 @@ behavior "pull_request_path_labeler" "service_labels" {
       "**/*_macie_*",
       "**/macie_*"
     ]
+    "service/macie2" = [
+      "aws/internal/service/macie2/**/*",
+      "**/*_macie2_*",
+      "**/macie2_*"
+    ]
     "service/marketplacecatalog" = [
       "aws/internal/service/marketplacecatalog/**/*",
       "**/*_marketplace_catalog_*",
@@ -1424,6 +1430,11 @@ behavior "pull_request_path_labeler" "service_labels" {
       "aws/internal/service/synthetics/**/*",
       "**/*_synthetics_*",
       "**/synthetics_*"
+    ]
+    "service/timestreamwrite" = [
+      "aws/internal/service/timestreamwrite/**/*",
+      "**/*_timestreamwrite_*",
+      "**/timestreamwrite_*"
     ]
     "service/transfer" = [
       "aws/internal/service/transfer/**/*",

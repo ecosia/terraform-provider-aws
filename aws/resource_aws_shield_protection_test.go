@@ -113,7 +113,11 @@ func TestAccAWSShieldProtection_Cloudfront(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t); testAccPreCheckAWSShield(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPartitionHasServicePreCheck("cloudfront", t)
+			testAccPreCheckAWSShield(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAWSShieldProtectionDestroy,
 		Steps: []resource.TestStep{
@@ -304,7 +308,7 @@ resource "aws_elb" "acctest" {
   name = var.name
 
   #availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  subnets  = [aws_subnet.acctest[0].id, aws_subnet.acctest[1].id]
+  subnets  = aws_subnet.acctest[*].id
   internal = true
 
   listener {
@@ -353,7 +357,7 @@ resource "aws_lb" "acctest" {
   name            = var.name
   internal        = true
   security_groups = [aws_security_group.acctest.id]
-  subnets         = [aws_subnet.acctest[0].id, aws_subnet.acctest[1].id]
+  subnets         = aws_subnet.acctest[*].id
 
   idle_timeout               = 30
   enable_deletion_protection = false
@@ -505,6 +509,7 @@ data "aws_availability_zones" "available" {
     values = ["opt-in-not-required"]
   }
 }
+
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 

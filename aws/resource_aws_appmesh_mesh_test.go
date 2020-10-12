@@ -71,7 +71,7 @@ func testAccAwsAppmeshMesh_basic(t *testing.T) {
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t); testAccPartitionHasServicePreCheck("appmesh", t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAppmeshMeshDestroy,
 		Steps: []resource.TestStep{
@@ -82,6 +82,8 @@ func testAccAwsAppmeshMesh_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttrSet(resourceName, "created_date"),
 					resource.TestCheckResourceAttrSet(resourceName, "last_updated_date"),
+					testAccCheckResourceAttrAccountID(resourceName, "mesh_owner"),
+					testAccCheckResourceAttrAccountID(resourceName, "resource_owner"),
 					testAccMatchResourceAttrRegionalARN(resourceName, "arn", "appmesh", regexp.MustCompile(`mesh/.+`)),
 				),
 			},
@@ -100,7 +102,7 @@ func testAccAwsAppmeshMesh_egressFilter(t *testing.T) {
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t); testAccPartitionHasServicePreCheck("appmesh", t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAppmeshMeshDestroy,
 		Steps: []resource.TestStep{
@@ -139,7 +141,7 @@ func testAccAwsAppmeshMesh_tags(t *testing.T) {
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t); testAccPartitionHasServicePreCheck("appmesh", t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAppmeshMeshDestroy,
 		Steps: []resource.TestStep{
