@@ -9,7 +9,7 @@ import (
 	"github.com/terraform-providers/terraform-provider-aws/aws/internal/tfawsresource"
 )
 
-func TestAccDataSourceAwsSsoPermissionSetBasic(t *testing.T) {
+func TestAccDataSourceAwsSsoPermissionSet_Basic(t *testing.T) {
 	datasourceName := "data.aws_sso_permission_set.test"
 	rName := acctest.RandomWithPrefix("tf-sso-test")
 
@@ -22,7 +22,7 @@ func TestAccDataSourceAwsSsoPermissionSetBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "managed_policy_arns.#", "1"),
 					tfawsresource.TestCheckTypeSetElemAttr(datasourceName, "managed_policy_arns.*", "arn:aws:iam::aws:policy/ReadOnlyAccess"),
-					resource.TestCheckResourceAttr(datasourceName, "name", fmt.Sprintf("%s", rName)),
+					resource.TestCheckResourceAttr(datasourceName, "name", rName),
 					resource.TestCheckResourceAttr(datasourceName, "description", "testing"),
 					resource.TestCheckResourceAttr(datasourceName, "session_duration", "PT1H"),
 					resource.TestCheckResourceAttr(datasourceName, "relay_state", "https://console.aws.amazon.com/console/home"),
@@ -33,7 +33,7 @@ func TestAccDataSourceAwsSsoPermissionSetBasic(t *testing.T) {
 	})
 }
 
-func TestAccDataSourceAwsSsoPermissionSetByTags(t *testing.T) {
+func TestAccDataSourceAwsSsoPermissionSet_Tags(t *testing.T) {
 	datasourceName := "data.aws_sso_permission_set.test"
 	rName := acctest.RandomWithPrefix("tf-sso-test")
 
@@ -46,7 +46,7 @@ func TestAccDataSourceAwsSsoPermissionSetByTags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "managed_policy_arns.#", "1"),
 					tfawsresource.TestCheckTypeSetElemAttr(datasourceName, "managed_policy_arns.*", "arn:aws:iam::aws:policy/ReadOnlyAccess"),
-					resource.TestCheckResourceAttr(datasourceName, "name", fmt.Sprintf("%s", rName)),
+					resource.TestCheckResourceAttr(datasourceName, "name", rName),
 					resource.TestCheckResourceAttr(datasourceName, "description", "testing"),
 					resource.TestCheckResourceAttr(datasourceName, "session_duration", "PT1H"),
 					resource.TestCheckResourceAttr(datasourceName, "relay_state", "https://console.aws.amazon.com/console/home"),

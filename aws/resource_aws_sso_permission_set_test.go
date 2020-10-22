@@ -14,7 +14,7 @@ import (
 	"github.com/terraform-providers/terraform-provider-aws/aws/internal/tfawsresource"
 )
 
-func TestAccAWSSSOPermissionSetBasic(t *testing.T) {
+func TestAccAWSSSOPermissionSet_Basic(t *testing.T) {
 	var permissionSet, updatedPermissionSet ssoadmin.PermissionSet
 	resourceName := "aws_sso_permission_set.example"
 	name := acctest.RandString(5)
