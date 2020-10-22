@@ -3,13 +3,15 @@ on:
   push:
     branches:
       - master
-      - 'release/**'
+      - "release/**"
   pull_request:
     paths:
       - .github/workflows/acctest-terraform-lint.yml
       - aws/core_acceptance_test.go
       - aws/data_source_aws_*_test.go
       - aws/resource_aws_*_test.go
+      - scripts/validate-terraform.sh
+      - tools/go.mod
 
 env:
   GO_VERSION: "1.15"
@@ -91,4 +93,3 @@ jobs:
             | grep -v resource_aws_s3_bucket_object_test.go \
             | grep -v resource_aws_sns_platform_application_test.go \
             | ./scripts/validate-terraform.sh
-          
