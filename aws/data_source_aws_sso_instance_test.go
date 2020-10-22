@@ -38,7 +38,7 @@ func testAccPreCheckAWSSSOInstance(t *testing.T) {
 	}
 }
 
-func TestAccDataSourceAwsSsoInstance_basic(t *testing.T) {
+func TestAccDataSourceAwsSsoInstance_Basic(t *testing.T) {
 	datasourceName := "data.aws_sso_instance.selected"
 
 	resource.ParallelTest(t, resource.TestCase{

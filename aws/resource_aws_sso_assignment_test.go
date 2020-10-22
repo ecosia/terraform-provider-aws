@@ -26,7 +26,7 @@ func testAccPreCheckAWSSIdentityStoreUser(t *testing.T, identityStoreUser string
 	}
 }
 
-func TestAccAWSSSOAssignmentGroup_basic(t *testing.T) {
+func TestAccAWSSSOAssignmentGroup_Basic(t *testing.T) {
 	var accountAssignment ssoadmin.AccountAssignment
 	resourceName := "aws_sso_assignment.example"
 	rName := acctest.RandomWithPrefix("tf-sso-test")
@@ -61,7 +61,7 @@ func TestAccAWSSSOAssignmentGroup_basic(t *testing.T) {
 	})
 }
 
-func TestAccAWSSSOAssignmentUser_basic(t *testing.T) {
+func TestAccAWSSSOAssignmentUser_Basic(t *testing.T) {
 	var accountAssignment ssoadmin.AccountAssignment
 	resourceName := "aws_sso_assignment.example"
 	rName := acctest.RandomWithPrefix("tf-sso-test")
@@ -96,7 +96,7 @@ func TestAccAWSSSOAssignmentUser_basic(t *testing.T) {
 	})
 }
 
-func TestAccAWSSSOAssignmentGroup_disappears(t *testing.T) {
+func TestAccAWSSSOAssignmentGroup_Disappears(t *testing.T) {
 	var accountAssignment ssoadmin.AccountAssignment
 	resourceName := "aws_sso_assignment.example"
 	rName := acctest.RandomWithPrefix("tf-sso-test")

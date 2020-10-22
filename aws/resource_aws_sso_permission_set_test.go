@@ -14,7 +14,7 @@ import (
 	"github.com/terraform-providers/terraform-provider-aws/aws/internal/tfawsresource"
 )
 
-func TestAccAWSSSOPermissionSet_basic(t *testing.T) {
+func TestAccAWSSSOPermissionSet_Basic(t *testing.T) {
 	var permissionSet, updatedPermissionSet ssoadmin.PermissionSet
 	resourceName := "aws_sso_permission_set.example"
 	rName := acctest.RandomWithPrefix("tf-sso-test")
@@ -56,7 +56,7 @@ func TestAccAWSSSOPermissionSet_basic(t *testing.T) {
 	})
 }
 
-func TestAccAWSSSOPermissionSet_disappears(t *testing.T) {
+func TestAccAWSSSOPermissionSet_Disappears(t *testing.T) {
 	var permissionSet ssoadmin.PermissionSet
 	resourceName := "aws_sso_permission_set.example"
 	rName := acctest.RandomWithPrefix("tf-sso-test")
@@ -78,7 +78,7 @@ func TestAccAWSSSOPermissionSet_disappears(t *testing.T) {
 	})
 }
 
-func TestAccAWSSSOPermissionSet_tags(t *testing.T) {
+func TestAccAWSSSOPermissionSet_Tags(t *testing.T) {
 	var permissionSet ssoadmin.PermissionSet
 	resourceName := "aws_sso_permission_set.example"
 	rName := acctest.RandomWithPrefix("tf-sso-test")
