@@ -762,7 +762,7 @@ func TestAccAWSRDSCluster_ReplicationSourceIdentifier_KmsKeyId(t *testing.T) {
 			testAccPreCheck(t)
 			testAccMultipleRegionPreCheck(t, 2)
 		},
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckWithProviders(testAccCheckAWSClusterDestroyWithProvider, &providers),
 		Steps: []resource.TestStep{
 			{
@@ -1340,7 +1340,7 @@ func TestAccAWSRDSCluster_GlobalClusterIdentifier_EngineMode_Provisioned(t *test
 	})
 }
 
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/13126
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/13126
 func TestAccAWSRDSCluster_GlobalClusterIdentifier_PrimarySecondaryClusters(t *testing.T) {
 	var providers []*schema.Provider
 	var primaryDbCluster, secondaryDbCluster rds.DBCluster
@@ -1353,8 +1353,12 @@ func TestAccAWSRDSCluster_GlobalClusterIdentifier_PrimarySecondaryClusters(t *te
 	resourceNameSecondary := "aws_rds_cluster.secondary"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories(&providers),
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccMultipleRegionPreCheck(t, 2)
+			testAccPreCheckAWSRdsGlobalCluster(t)
+		},
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckAWSClusterDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -1368,7 +1372,7 @@ func TestAccAWSRDSCluster_GlobalClusterIdentifier_PrimarySecondaryClusters(t *te
 	})
 }
 
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/13715
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/13715
 func TestAccAWSRDSCluster_GlobalClusterIdentifier_ReplicationSourceIdentifier(t *testing.T) {
 	var providers []*schema.Provider
 	var primaryDbCluster, secondaryDbCluster rds.DBCluster
@@ -1383,7 +1387,7 @@ func TestAccAWSRDSCluster_GlobalClusterIdentifier_ReplicationSourceIdentifier(t 
 			testAccMultipleRegionPreCheck(t, 2)
 			testAccPreCheckAWSRdsGlobalCluster(t)
 		},
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckAWSClusterDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -1489,7 +1493,7 @@ func TestAccAWSRDSCluster_ScalingConfiguration(t *testing.T) {
 	})
 }
 
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/11698
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/11698
 func TestAccAWSRDSCluster_ScalingConfiguration_DefaultMinCapacity(t *testing.T) {
 	var dbCluster rds.DBCluster
 
@@ -1737,7 +1741,7 @@ func TestAccAWSRDSCluster_SnapshotIdentifier_EngineMode_Serverless(t *testing.T)
 	})
 }
 
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/6157
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/6157
 func TestAccAWSRDSCluster_SnapshotIdentifier_EngineVersion_Different(t *testing.T) {
 	var dbCluster, sourceDbCluster rds.DBCluster
 	var dbClusterSnapshot rds.DBClusterSnapshot
@@ -1777,7 +1781,7 @@ func TestAccAWSRDSCluster_SnapshotIdentifier_EngineVersion_Different(t *testing.
 	})
 }
 
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/6157
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/6157
 func TestAccAWSRDSCluster_SnapshotIdentifier_EngineVersion_Equal(t *testing.T) {
 	var dbCluster, sourceDbCluster rds.DBCluster
 	var dbClusterSnapshot rds.DBClusterSnapshot
@@ -2053,7 +2057,7 @@ func TestAccAWSRDSCluster_SnapshotIdentifier_VpcSecurityGroupIds(t *testing.T) {
 	})
 }
 
-// Regression reference: https://github.com/terraform-providers/terraform-provider-aws/issues/5450
+// Regression reference: https://github.com/hashicorp/terraform-provider-aws/issues/5450
 // This acceptance test explicitly tests when snapshot_identifier is set,
 // vpc_security_group_ids is set (which triggered the resource update function),
 // and tags is set which was missing its ARN used for tagging

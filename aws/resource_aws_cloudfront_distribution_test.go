@@ -12,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudfront"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/terraform-providers/terraform-provider-aws/aws/internal/tfawsresource"
 )
@@ -249,7 +248,7 @@ func TestAccAWSCloudFrontDistribution_multiOrigin(t *testing.T) {
 	})
 }
 
-// https://github.com/terraform-providers/terraform-provider-aws/issues/188
+// https://github.com/hashicorp/terraform-provider-aws/issues/188
 // TestAccAWSCloudFrontDistribution_orderedCacheBehavior runs an
 // aws_cloudfront_distribution acceptance test with multiple and ordered cache behaviors.
 //
@@ -757,13 +756,12 @@ func TestAccAWSCloudFrontDistribution_OrderedCacheBehavior_ForwardedValues_Heade
 
 func TestAccAWSCloudFrontDistribution_ViewerCertificate_AcmCertificateArn(t *testing.T) {
 	var distribution cloudfront.Distribution
-	var providers []*schema.Provider
 	resourceName := "aws_cloudfront_distribution.test"
 	retainOnDelete := testAccAWSCloudFrontDistributionRetainOnDeleteFromEnv()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t); testAccPartitionHasServicePreCheck("cloudfront", t) },
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckCloudFrontDistributionDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -786,16 +784,15 @@ func TestAccAWSCloudFrontDistribution_ViewerCertificate_AcmCertificateArn(t *tes
 	})
 }
 
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/7773
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/7773
 func TestAccAWSCloudFrontDistribution_ViewerCertificate_AcmCertificateArn_ConflictsWithCloudFrontDefaultCertificate(t *testing.T) {
 	var distribution cloudfront.Distribution
-	var providers []*schema.Provider
 	resourceName := "aws_cloudfront_distribution.test"
 	retainOnDelete := testAccAWSCloudFrontDistributionRetainOnDeleteFromEnv()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t); testAccPartitionHasServicePreCheck("cloudfront", t) },
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckCloudFrontDistributionDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -2538,10 +2535,8 @@ func testAccAWSCloudFrontDistributionConfigViewerCertificateAcmCertificateArnBas
 	key := tlsRsaPrivateKeyPem(2048)
 	certificate := tlsRsaX509SelfSignedCertificatePem(key, commonName)
 
-	return testAccUsEast1RegionProviderConfig() + fmt.Sprintf(`
+	return testAccCloudfrontRegionProviderConfig() + fmt.Sprintf(`
 resource "aws_acm_certificate" "test" {
-  provider = "awsus-east-1"
-
   certificate_body = "%[1]s"
   private_key      = "%[2]s"
 }

@@ -197,7 +197,7 @@ func TestAccAWSS3Bucket_basic(t *testing.T) {
 }
 
 // Support for common Terraform 0.11 pattern
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/7868
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/7868
 func TestAccAWSS3Bucket_Bucket_EmptyString(t *testing.T) {
 	resourceName := "aws_s3_bucket.test"
 
@@ -1366,7 +1366,7 @@ func TestAccAWSS3Bucket_LifecycleExpireMarkerOnly(t *testing.T) {
 	})
 }
 
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/11420
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/11420
 func TestAccAWSS3Bucket_LifecycleRule_Expiration_EmptyConfigurationBlock(t *testing.T) {
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	resourceName := "aws_s3_bucket.bucket"
@@ -1386,7 +1386,7 @@ func TestAccAWSS3Bucket_LifecycleRule_Expiration_EmptyConfigurationBlock(t *test
 	})
 }
 
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/15138
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/15138
 func TestAccAWSS3Bucket_LifecycleRule_AbortIncompleteMultipartUploadDays_NoExpiration(t *testing.T) {
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	resourceName := "aws_s3_bucket.bucket"
@@ -1426,10 +1426,9 @@ func TestAccAWSS3Bucket_Replication(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccMultipleRegionsPreCheck(t)
-			testAccAlternateRegionPreCheck(t)
+			testAccMultipleRegionPreCheck(t, 2)
 		},
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckWithProviders(testAccCheckAWSS3BucketDestroyWithProvider, &providers),
 		Steps: []resource.TestStep{
 			{
@@ -1457,7 +1456,6 @@ func TestAccAWSS3Bucket_Replication(t *testing.T) {
 					testAccCheckAWSS3BucketExistsWithProvider("aws_s3_bucket.destination", testAccAwsRegionProviderFunc(alternateRegion, &providers)),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1482,7 +1480,6 @@ func TestAccAWSS3Bucket_Replication(t *testing.T) {
 					testAccCheckAWSS3BucketExistsWithProvider("aws_s3_bucket.destination", testAccAwsRegionProviderFunc(alternateRegion, &providers)),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1506,7 +1503,6 @@ func TestAccAWSS3Bucket_Replication(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "replication_configuration.0.rules.#", "1"),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1546,10 +1542,9 @@ func TestAccAWSS3Bucket_ReplicationConfiguration_Rule_Destination_AccessControlT
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccMultipleRegionsPreCheck(t)
-			testAccAlternateRegionPreCheck(t)
+			testAccMultipleRegionPreCheck(t, 2)
 		},
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckWithProviders(testAccCheckAWSS3BucketDestroyWithProvider, &providers),
 		Steps: []resource.TestStep{
 			{
@@ -1561,7 +1556,6 @@ func TestAccAWSS3Bucket_ReplicationConfiguration_Rule_Destination_AccessControlT
 					resource.TestCheckResourceAttr(resourceName, "replication_configuration.0.rules.#", "1"),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1596,7 +1590,6 @@ func TestAccAWSS3Bucket_ReplicationConfiguration_Rule_Destination_AccessControlT
 					resource.TestCheckResourceAttr(resourceName, "replication_configuration.0.rules.#", "1"),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1627,7 +1620,7 @@ func TestAccAWSS3Bucket_ReplicationConfiguration_Rule_Destination_AccessControlT
 	})
 }
 
-// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/12480
+// Reference: https://github.com/hashicorp/terraform-provider-aws/issues/12480
 func TestAccAWSS3Bucket_ReplicationConfiguration_Rule_Destination_AddAccessControlTranslation(t *testing.T) {
 	rInt := acctest.RandInt()
 	region := testAccGetRegion()
@@ -1641,10 +1634,9 @@ func TestAccAWSS3Bucket_ReplicationConfiguration_Rule_Destination_AddAccessContr
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccMultipleRegionsPreCheck(t)
-			testAccAlternateRegionPreCheck(t)
+			testAccMultipleRegionPreCheck(t, 2)
 		},
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckWithProviders(testAccCheckAWSS3BucketDestroyWithProvider, &providers),
 		Steps: []resource.TestStep{
 			{
@@ -1656,7 +1648,6 @@ func TestAccAWSS3Bucket_ReplicationConfiguration_Rule_Destination_AddAccessContr
 					resource.TestCheckResourceAttr(resourceName, "replication_configuration.0.rules.#", "1"),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1688,7 +1679,6 @@ func TestAccAWSS3Bucket_ReplicationConfiguration_Rule_Destination_AddAccessContr
 					resource.TestCheckResourceAttr(resourceName, "replication_configuration.0.rules.#", "1"),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1724,10 +1714,9 @@ func TestAccAWSS3Bucket_ReplicationWithoutStorageClass(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccMultipleRegionsPreCheck(t)
-			testAccAlternateRegionPreCheck(t)
+			testAccMultipleRegionPreCheck(t, 2)
 		},
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckWithProviders(testAccCheckAWSS3BucketDestroyWithProvider, &providers),
 		Steps: []resource.TestStep{
 			{
@@ -1757,10 +1746,9 @@ func TestAccAWSS3Bucket_ReplicationExpectVersioningValidationError(t *testing.T)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccMultipleRegionsPreCheck(t)
-			testAccAlternateRegionPreCheck(t)
+			testAccMultipleRegionPreCheck(t, 2)
 		},
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckWithProviders(testAccCheckAWSS3BucketDestroyWithProvider, &providers),
 		Steps: []resource.TestStep{
 			{
@@ -1771,7 +1759,7 @@ func TestAccAWSS3Bucket_ReplicationExpectVersioningValidationError(t *testing.T)
 	})
 }
 
-// Prefix issue: https://github.com/terraform-providers/terraform-provider-aws/issues/6340
+// Prefix issue: https://github.com/hashicorp/terraform-provider-aws/issues/6340
 func TestAccAWSS3Bucket_ReplicationWithoutPrefix(t *testing.T) {
 	rInt := acctest.RandInt()
 	alternateRegion := testAccGetAlternateRegion()
@@ -1784,10 +1772,9 @@ func TestAccAWSS3Bucket_ReplicationWithoutPrefix(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccMultipleRegionsPreCheck(t)
-			testAccAlternateRegionPreCheck(t)
+			testAccMultipleRegionPreCheck(t, 2)
 		},
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckWithProviders(testAccCheckAWSS3BucketDestroyWithProvider, &providers),
 		Steps: []resource.TestStep{
 			{
@@ -1822,10 +1809,9 @@ func TestAccAWSS3Bucket_ReplicationSchemaV2(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccMultipleRegionsPreCheck(t)
-			testAccAlternateRegionPreCheck(t)
+			testAccMultipleRegionPreCheck(t, 2)
 		},
-		ProviderFactories: testAccProviderFactories(&providers),
+		ProviderFactories: testAccProviderFactoriesAlternate(&providers),
 		CheckDestroy:      testAccCheckWithProviders(testAccCheckAWSS3BucketDestroyWithProvider, &providers),
 		Steps: []resource.TestStep{
 			{
@@ -1838,7 +1824,6 @@ func TestAccAWSS3Bucket_ReplicationSchemaV2(t *testing.T) {
 					testAccCheckAWSS3BucketExistsWithProvider("aws_s3_bucket.destination", testAccAwsRegionProviderFunc(alternateRegion, &providers)),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1876,7 +1861,6 @@ func TestAccAWSS3Bucket_ReplicationSchemaV2(t *testing.T) {
 					testAccCheckAWSS3BucketExistsWithProvider("aws_s3_bucket.destination", testAccAwsRegionProviderFunc(alternateRegion, &providers)),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1915,7 +1899,6 @@ func TestAccAWSS3Bucket_ReplicationSchemaV2(t *testing.T) {
 					testAccCheckAWSS3BucketExistsWithProvider("aws_s3_bucket.destination", testAccAwsRegionProviderFunc(alternateRegion, &providers)),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -1958,7 +1941,6 @@ func TestAccAWSS3Bucket_ReplicationSchemaV2(t *testing.T) {
 					testAccCheckAWSS3BucketExistsWithProvider("aws_s3_bucket.destination", testAccAwsRegionProviderFunc(alternateRegion, &providers)),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccAwsRegionProviderFunc(region, &providers),
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("foobar"),
@@ -2020,7 +2002,6 @@ func TestAccAWSS3Bucket_SameRegionReplicationSchemaV2(t *testing.T) {
 					testAccCheckAWSS3BucketExists(destinationResourceName),
 					testAccCheckAWSS3BucketReplicationRules(
 						resourceName,
-						testAccProviderFunc,
 						[]*s3.ReplicationRule{
 							{
 								ID: aws.String("testid"),
@@ -2881,7 +2862,7 @@ func testAccCheckAWSS3BucketLogging(n, b, p string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckAWSS3BucketReplicationRules(n string, providerF func() *schema.Provider, rules []*s3.ReplicationRule) resource.TestCheckFunc {
+func testAccCheckAWSS3BucketReplicationRules(n string, rules []*s3.ReplicationRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 		for _, rule := range rules {
@@ -2912,9 +2893,7 @@ func testAccCheckAWSS3BucketReplicationRules(n string, providerF func() *schema.
 			}
 		}
 
-		provider := providerF()
-
-		conn := provider.Meta().(*AWSClient).s3conn
+		conn := testAccProvider.Meta().(*AWSClient).s3conn
 		out, err := conn.GetBucketReplication(&s3.GetBucketReplicationInput{
 			Bucket: aws.String(rs.Primary.ID),
 		})
