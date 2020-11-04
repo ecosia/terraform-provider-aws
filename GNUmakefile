@@ -21,7 +21,7 @@ sweep:
 	go test $(SWEEP_DIR) -v -sweep=$(SWEEP) $(SWEEPARGS) -timeout 60m
 
 test: fmtcheck
-	go test $(TEST) $(TESTARGS) -timeout=120s -parallel=4
+	go test $(TEST) $(TESTARGS) -timeout=5m -parallel=4
 
 testacc: fmtcheck
 	@if [ "$(TESTARGS)" = "-run=TestAccXXX" ]; then \
@@ -31,7 +31,7 @@ testacc: fmtcheck
 		echo "For example if updating aws/resource_aws_acm_certificate.go, use the test names in aws/resource_aws_acm_certificate_test.go starting with TestAcc and up to the underscore:"; \
 		echo "make testacc TESTARGS='-run=TestAccAWSAcmCertificate_'"; \
 		echo ""; \
-		echo "See the contributing guide for more information: https://github.com/terraform-providers/terraform-provider-aws/blob/master/docs/contributing/running-and-writing-acceptance-tests.md"; \
+		echo "See the contributing guide for more information: https://github.com/hashicorp/terraform-provider-aws/blob/master/docs/contributing/running-and-writing-acceptance-tests.md"; \
 		exit 1; \
 	fi
 	TF_ACC=1 go test ./$(PKG_NAME) -v -count $(TEST_COUNT) -parallel $(ACCTEST_PARALLELISM) $(TESTARGS) -timeout $(ACCTEST_TIMEOUT)
@@ -97,6 +97,7 @@ awsproviderlint:
 		-AWSAT001 \
 		-AWSAT002 \
 		-AWSAT004 \
+		-AWSAT005 \
 		-AWSR001 \
 		-AWSR002 \
 		-R002 \
@@ -111,6 +112,9 @@ awsproviderlint:
 		-R012 \
 		-R013 \
 		-R014 \
+		-R015 \
+		-R016 \
+		-R017 \
 		-S001 \
 		-S002 \
 		-S003 \
