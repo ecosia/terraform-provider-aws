@@ -7,9 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53domains"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/terraform-providers/terraform-provider-aws/aws/internal/keyvaluetags"
 )
 
@@ -17,6 +17,7 @@ func resourceAwsRoute53DomainsDomainContactDetail() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
 		Computed: true,
+		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"address_line_1": {
@@ -365,6 +366,25 @@ func resourceAwsRoute53DomainsDomainFlattenContactDetail(in *route53domains.Cont
 	return out
 }
 
+func resourceAwsRoute53DomainsContactDetail(d *schema.ResourceData, key string) *route53domains.ContactDetail {
+	contact := d.Get(key).([]interface{})[0].(map[string]interface{})
+
+	return new(route53domains.ContactDetail).
+		SetContactType(contact["contact_type"].(string)).
+		SetAddressLine1(contact["address_line_1"].(string)).
+		SetAddressLine2(contact["address_line_2"].(string)).
+		SetCity(contact["city"].(string)).
+		SetZipCode(contact["zip_code"].(string)).
+		SetState(contact["state"].(string)).
+		SetCountryCode(contact["country_code"].(string)).
+		SetEmail(contact["email"].(string)).
+		SetPhoneNumber(contact["phone_number"].(string)).
+		SetFax(contact["fax"].(string)).
+		SetOrganizationName(contact["organization_name"].(string)).
+		SetFirstName(contact["first_name"].(string)).
+		SetLastName(contact["last_name"].(string))
+}
+
 func resourceAwsRoute53DomainsDomainUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*AWSClient).route53domainsconn
 
@@ -451,6 +471,32 @@ func resourceAwsRoute53DomainsDomainUpdate(d *schema.ResourceData, meta interfac
 		if err != nil {
 			return fmt.Errorf("Error updating domain name servers for Route 53 domain (%s), error: %s", d.Id(), err)
 		}
+		if err := resourceAwsRoute53DomainsDomainWaitForOperation(conn, *out.OperationId, d.Timeout(schema.TimeoutUpdate)); err != nil {
+			return fmt.Errorf("Error waiting for Route 53 domain operation (%s) on domain (%s) to complete: %s", *out.OperationId, d.Id(), err)
+		}
+	}
+
+	if d.HasChange("admin_contact") || d.HasChange("tech_contact") || d.HasChange("registrant_contact") {
+		log.Printf("[DEBUG] Updating contact details for Route 53 domain (%s)", d.Id())
+		in := &route53domains.UpdateDomainContactInput{
+			DomainName: aws.String(d.Id()),
+		}
+
+		if d.HasChange("admin_contact") {
+			in.SetAdminContact(resourceAwsRoute53DomainsContactDetail(d, "admin_contact"))
+		}
+		if d.HasChange("tech_contact") {
+			in.SetTechContact(resourceAwsRoute53DomainsContactDetail(d, "tech_contact"))
+		}
+		if d.HasChange("registrant_contact") {
+			in.SetRegistrantContact(resourceAwsRoute53DomainsContactDetail(d, "registrant_contact"))
+		}
+
+		out, err := conn.UpdateDomainContact(in)
+		if err != nil {
+			return fmt.Errorf("Error updating domain contacts for Route 53 domain (%s), error: %s", d.Id(), err)
+		}
+
 		if err := resourceAwsRoute53DomainsDomainWaitForOperation(conn, *out.OperationId, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("Error waiting for Route 53 domain operation (%s) on domain (%s) to complete: %s", *out.OperationId, d.Id(), err)
 		}
