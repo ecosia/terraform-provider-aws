@@ -486,10 +486,10 @@ func resourceAwsRoute53DomainsDomainUpdate(d *schema.ResourceData, meta interfac
 			in.SetAdminContact(resourceAwsRoute53DomainsContactDetail(d, "admin_contact"))
 		}
 		if d.HasChange("tech_contact") {
-			in.SetAdminContact(resourceAwsRoute53DomainsContactDetail(d, "tech_contact"))
+			in.SetTechContact(resourceAwsRoute53DomainsContactDetail(d, "tech_contact"))
 		}
 		if d.HasChange("registrant_contact") {
-			in.SetAdminContact(resourceAwsRoute53DomainsContactDetail(d, "registrant_contact"))
+			in.SetRegistrantContact(resourceAwsRoute53DomainsContactDetail(d, "registrant_contact"))
 		}
 
 		out, err := conn.UpdateDomainContact(in)
